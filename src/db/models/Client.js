@@ -7,6 +7,31 @@ const errors = require('../../utils/validationErrors')
 class Client extends Sequelize.Model {
   static init (sequelize) {
     return super.init({
+      firstName: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            args: true,
+            msg: errors.empty('firstName')
+          }
+        }
+      },
+      lastName: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            args: true,
+            msg: errors.empty('lastName')
+          }
+        }
+      },
+      document: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -18,22 +43,6 @@ class Client extends Sequelize.Model {
           },
           isEmail: true
         }
-      },
-      fullName: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: {
-            args: true,
-            msg: errors.empty('fullName')
-          }
-        }
-      },
-      company: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: '',
-        validate: {}
       },
       telephone: {
         type: Sequelize.STRING,
@@ -56,6 +65,14 @@ class Client extends Sequelize.Model {
           }
         }
       },
+      points: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate: {
+          min: 0
+        }
+      },
       password: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -66,31 +83,10 @@ class Client extends Sequelize.Model {
           }
         }
       },
-      credit: {
-        type: Sequelize.STRING(1024),
+      acceptedTerms: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: '',
-        get () {
-          const storedValue = this.getDataValue('credit')
-          if (storedValue.length === 0) return 0
-
-          const json = JSON.parse(storedValue)
-
-          const iv = Buffer.from(json.iv, 'hex')
-
-          const decipher = crypto.createDecipheriv('aes256', process.env.ENC_KEY, iv)
-
-          const decryptedValue = decipher.update(json.ev, 'hex', 'utf8') + decipher.final('utf8')
-          return JSON.parse(decryptedValue)
-        },
-        set (value) {
-          const iv = crypto.randomBytes(32)
-
-          const cipher = crypto.createCipheriv('aes256', process.env.ENC_KEY, iv)
-
-          const encryptedValue = cipher.update(JSON.stringify(value), 'utf8', 'hex') + cipher.final('hex')
-          this.setDataValue('credit', JSON.stringify({ev: encryptedValue, iv: iv.toString('hex')}))
-        }
+        defaultValue: false
       },
       recover_token: {
         type: Sequelize.STRING
