@@ -1,0 +1,56 @@
+{
+  "name": "hackathon",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./src/bin/run.js",
+    "dev": "export $(cat .env | xargs) && nodemon ./src/bin/run.js",
+    "docker-local": "npm run copy-env & docker build -t flow . && docker run --rm --env-file .env.docker -p 4000:4000 flow:latest",
+    "eb-dev": "npm run copy-env && eb local setenv `cat .env.docker` && eb local run --port 4000",
+    "ev-prod": "eb local setenv `cat .env.prod` && eb local run --port 4000",
+    "deploy": "eb deploy",
+    "setenv": "eb setenv `cat .env.prod`",
+    "reset-tables": "export $(cat .env | xargs) && node ./src/bin/reset-tables.js && sequelize db:seed:all",
+    "test": "DEBUG='' standard src/**/*.js test/**/*.js && nyc ava",
+    "copy-env": "sed 's/localhost/docker.for.mac.host.internal/' .env > .env.docker"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.301.0",
+    "axios": "^0.18.0",
+    "axios-retry": "^3.1.1",
+    "bcryptjs": "^2.4.3",
+    "blocked-at": "^1.1.2",
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
+    "cors": "^2.8.4",
+    "debug": "^3.1.0",
+    "express": "^4.16.3",
+    "express-debug-async-wrap": "^2.0.1",
+    "express-route-autoloader": "^1.0.3",
+    "express-sequelize-crud-router": "^1.0.3",
+    "fb-messenger": "^2.3.1",
+    "handlebars": "^4.0.11",
+    "json-bigint": "^0.3.0",
+    "moment-timezone": "^0.5.21",
+    "morgan": "^1.9.0",
+    "morgan-debug": "^2.0.0",
+    "multer": "^1.3.1",
+    "nodemailer": "^4.6.8",
+    "pg": "^7.4.3",
+    "randexp": "^0.5.3",
+    "redis": "^2.8.0",
+    "sequelize": "^4.38.0",
+    "sequelize-cli": "^4.1.1",
+    "sequelize-express-findbyid": "^1.0.7"
+  },
+  "devDependencies": {
+    "ava": "^0.25.0",
+    "nodemon": "^1.18.3",
+    "nyc": "^12.0.2",
+    "standard": "^11.0.1",
+    "supertest": "^3.1.0"
+  },
+  "watch": {
+    "dev": "src/*"
+  }
+}
