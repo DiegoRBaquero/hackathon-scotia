@@ -2,10 +2,14 @@ const Sequelize = require('sequelize')
 
 const errors = require('../../utils/validationErrors')
 
-class Movement extends Sequelize.Model {
+class Redemption extends Sequelize.Model {
   static init (sequelize) {
     return super.init({
-      amount: {
+      pointsAmount: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      moneyAmount: {
         type: Sequelize.INTEGER,
         allowNull: false
       }
@@ -17,6 +21,7 @@ class Movement extends Sequelize.Model {
   }
 
   static associate (models) {
+    this.belongsTo(models.Reward)
     this.belongsTo(models.Client, {
       foreignKey: {
         allowNull: false
@@ -25,4 +30,4 @@ class Movement extends Sequelize.Model {
   }
 }
 
-module.exports = Movement
+module.exports = Redemption

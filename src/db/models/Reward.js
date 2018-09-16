@@ -16,6 +16,17 @@ class Reward extends Sequelize.Model {
           }
         }
       },
+      description: {
+        type: Sequelize.STRING(500),
+        allowNull: false,
+        defaultValue: '',
+        unique: true
+      },
+      category: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'Sin categoría'
+      },
       pointsCost: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -32,9 +43,12 @@ class Reward extends Sequelize.Model {
           min: 1
         }
       },
-      photo: {
+      photoUrl: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      withFriends: {
+        type: Sequelize.BOOLEAN
       }
     }, {
       sequelize,
@@ -44,11 +58,6 @@ class Reward extends Sequelize.Model {
   }
 
   static associate (models) {
-    this.belongsTo(models.Client, {
-      foreignKey: {
-        allowNull: false
-      }
-    })
   }
 }
 

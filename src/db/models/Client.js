@@ -32,6 +32,9 @@ class Client extends Sequelize.Model {
         allowNull: false,
         unique: true
       },
+      birthday: {
+        type: Sequelize.DATEONLY,
+      },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -110,6 +113,23 @@ class Client extends Sequelize.Model {
   }
 
   static associate (models) {
+    this.belongsToMany(models.Client, { through: models.Friend, as: 'Friends', foreignKey: 'ClientId1', otherKey: 'ClientId2' })
+    this.belongsToMany(models.Client, { through: models.Friend, as: 'Friends2', foreignKey: 'ClientId2', otherKey: 'ClientId1' })
+    this.hasMany(models.Redemption, {
+      foreignKey: {
+        allowNull: false
+      }
+    })
+    this.hasMany(models.Movement, {
+      foreignKey: {
+        allowNull: false
+      }
+    })
+    this.hasMany(models.CreditCard, {
+      foreignKey: {
+        allowNull: false
+      }
+    })
   }
 }
 
