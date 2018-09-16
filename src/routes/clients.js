@@ -466,7 +466,7 @@ router.get('/:documentId/redeem/:rewardId', wrapper(async (req, res) => {
     'ciudadprovedor': 'Bogota',
     'telephoneprovedor': '73846234',
     'observacionesfactu': 'Redencion puntos',
-    'puntos': reward.pointsCost
+    'puntos': 0
   }, {
     headers: {
       'content-type': 'application/json'
