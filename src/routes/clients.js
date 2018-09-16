@@ -4,658 +4,387 @@ const express = require('express')
 const wrapper = require(`express-debug-async-wrap`)(debug)
 const sef = require('sequelize-express-findbyid')
 
-const {Client, CreditCard, Movement, Redemption} = require(`../db`)
+const {Client, CreditCard, Movement, Redemption, Reward} = require(`../db`)
 const findById = sef(Client, 'document')
 
 const router = express.Router()
 
 const leTemplate = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+   <html>
+      <head>
+      <meta charset="UTF-8">
+         <title>
+            Your invoice for HealthPlanG purchase
+         </title>         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+         <meta name="viewport" content="width=device-width, initial-scale=1">         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+         <style type="text/css">
+            /* CLIENT-SPECIFIC STYLES */    body,    table,    td,    a {      -webkit-text-size-adjust: 100%;      -ms-text-size-adjust: 100%;    }    table,    td {      mso-table-lspace: 0pt;      mso-table-rspace: 0pt;    }    img {      -ms-interpolation-mode: bicubic;    }    /* RESET STYLES */    img {      border: 0;      height: auto;      line-height: 100%;      outline: none;      text-decoration: none;    }    table {      border-collapse: collapse !important;    }    body {      height: 100% !important;      margin: 0 !important;      padding: 0 !important;      width: 100% !important;    }    /* iOS BLUE LINKS */    a[x-apple-data-detectors] {      color: inherit !important;      text-decoration: none !important;      font-size: inherit !important;      font-family: inherit !important;      font-weight: inherit !important;      line-height: inherit !important;    }    /* MEDIA QUERIES */    @media screen and (max-width: 480px) {      .mobile-hide {        display: none !important;      }      .mobile-center {        text-align: center !important;      }      .align-center {        max-width: initial !important;      }      h1 {        display: inline-block;        margin-right: auto !important;        margin-left: auto !important;      }    }    @media screen and (min-width: 480px) {      .mw-50 {        max-width: 50%;      }    }    /* ANDROID CENTER FIX */    div[style*="margin: 16px 0;"] {      margin: 0 !important;    }    :root {      --purple: #5a3aa5;      --pink: #b91bab;      --blue: #2cbaef;      --green: #23c467;    }  
+         </style>
 </head>
-<body>
-<div class="header">
-    <h1>
-        {{firstName}}, este es tu catálogo de puntos
-    </h1>
-    <p>
-        "Una sonrisa es el mejor maquillaje que puedas usar"
-    </p>
-    <p>
-        ― Anónimo
-    </p>
-</div>
-<div class="cart-container">
-    <div class="empty" style="display:none">
-        No more twinkies !
-    </div>
-    <div class="cart">
-        <div class="product" data-price="45000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="https://s2.r29static.com//bin/entry/612/0,0,2000,2400/x/1911700/image.gif"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Camiseta
-                    </div>
-                    <div class="product-price">
-                        $ 45.000
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-        <div class="product" data-price="100000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="http://www.soniastyling.com/wp-content/uploads/2013/12/Top5MakeupFeature.jpg"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Maquillaje profesional
-                    </div>
-                    <div class="product-price">
-                        $ 100.000
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-        <div class="product" data-price="250000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="https://i.pinimg.com/originals/81/33/ae/8133ae8688b799ae3c657c7044e5fb11.jpg"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Channel 5
-                    </div>
-                    <div class="product-price">
-                        $ 250.000
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-        <div class="product" data-price="30000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="https://i.pinimg.com/236x/9a/2d/cc/9a2dcc24690e0dd8dd23e5e87cef282d--onyx-jewelry-onyx-necklace.jpg"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Collar
-                    </div>
-                    <div class="product-price">
-                        $ 30.000
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-        <div class="product" data-price="20000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="http://picture-cdn.wheretoget.it/1bv683-l-610x610-nail+polish-nails-nude-matte-pinterest-grey.jpg"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Esmalte Victoria Secret
-                    </div>
-                    <div class="product-price">
-                        $ 20.000 c/u
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-        <div class="product" data-price="30000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="https://i.ebayimg.com/images/g/3SUAAOSwiYFXKgdh/s-l300.jpg"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Gafas de gato
-                    </div>
-                    <div class="product-price">
-                        $ 30.000
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-        <div class="product" data-price="40000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="https://www.djconnections.co.uk/wp-content/uploads/2018/01/hairstyles-for-hats-lovely-the-25-best-hat-hairstyles-ideas-on-pinterest-of-hairstyles-for-hats.jpg"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Sombrero French
-                    </div>
-                    <div class="product-price">
-                        $ 40.000
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-        <div class="product" data-price="120000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="https://i.pinimg.com/736x/a1/46/ce/a146cecedb9311802779bc3e10beb0ef--grey-heels-outfit-strappy-heels-outfit.jpg"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Sandalia valenciana
-                    </div>
-                    <div class="product-price">
-                        $ 120.000
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-        <div class="product" data-price="60000" data-quantity="1">
-            <div class="product-preview">
-                <div class="thumbnail">
-                    <img class="image" src="http://pantolo.com/wp-content/uploads/2017/08/1000-ideas-about-High-Waisted-Palazzo-Pants-on-Pinterest-.jpg"/>
-                </div>
-                <div class="product-paper">
-                    <div class="product-name">
-                        Pantalón campana
-                    </div>
-                    <div class="product-price">
-                        $ 60.000
-                    </div>
-                </div>
-            </div>
-            <div class="product-quantity">
-                x1
-            </div>
-            <div class="product-interactions">
-                <div class="button plus">
-                    +
-                </div>
-                <div class="button minus">
-                    -
-                </div>
-                <div class="button del"></div>
-            </div>
-        </div>
-    </div>
-</div>
-<table class="bill">
-    <tr class="subtotal">
-        <td class="label">
-            Subtotal :
-        </td>
-        <td class="value">
-            $ 695000
-        </td>
-    </tr>
-    <tr class="salestax">
-        <td class="label">
-            Impuestos :
-        </td>
-        <td class="value">
-            $ 132050
-        </td>
-    </tr>
-    <tr>
-        <td class="label">
-            Shipping :
-        </td>
-        <td class="value">
-            $ 500
-        </td>
-    </tr>
-    <tr class="total">
-        <td class="label">
-            Total :
-        </td>
-        <td class="value">
-            $ 827055
-        </td>
-    </tr>
+      <body style="margin: 0 !important; padding: 0 !important; background-color: #eeeeee;" bgcolor="#eeeeee">
+         <!-- HIDDEN PREHEADER TEXT -->
+         <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: Open Sans, Helvetica, Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus dolor aliquid omnis consequatur est deserunt, odio neque blanditiis aspernatur, mollitia ipsa distinctio, culpa fuga obcaecati!    
+         </div>
+         <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+               <td align="center" style="background-color: #eeeeee;" bgcolor="#eeeeee">
+                  <!--[if (gte mso 9)|(IE)]>
+                  <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                     <tr>
+                        <td align="center" valign="top" width="600">
+                           <![endif]-->
+                              <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:100%;">
+                                 <tr>
+                                    <td align="center" height="100" style=" background-color: #DF0E20;" bgcolor="#b91bAb"></td>
+</tr>
 </table>
-<div class="actions">
-    <div class="big-button go">
-        Pagar!
-    </div>
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:800px;">
+               <tr>
+                  <td align="center" valign="top" style="background-color: #ffffff; font-size:0; padding: 35px 35px 0;" bgcolor="#ffffff">
+                     <!--[if (gte mso 9)|(IE)]>
+                     <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                        <tr>
+                           <td align="left" valign="top" width="300">
+                              <![endif]-->
+                                 <div class="align-center" style="display:inline-block; max-width:50%; min-width:100px; vertical-align:top; width:100%;">
+                                    <table class="align-center" align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:800px;">
+                                       <tr>
+                                          <td align="left" height="48" valign="center" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size:48px; font-weight: 800; line-height: 48px;" class="mobile-center">
+                                             <h1 style="font-size: 0; line-height: 0; font-weight: 600;  margin: 0; color: #ffffff;">
+                                                <img src="https://scotiabankfiles.azureedge.net/scotiabank-colombia/Attachments/NewItems/logo-scotiabankcolpatria-2_20180622202846_0.jpg" width="500" height="27" style="display: block; border: 0px;" alt="HealthPlanG" /><span>HealthPlan G</span>
+                                             </h1>
+</td>
+</tr>
+</table>
 </div>
-<style>
-    @import url(https://fonts.googleapis.com/css?family=Roboto:500);
-
-    * {
-        box-sizing: border-box;
-    }
-
-    html, body {
-        font: 16px "Roboto";
-        background: #f1eded;
-        color: #523118;
-        width: 100%;
-        height: 100%;
-    }
-
-    .header {
-        text-align: center;
-        padding: 1em 0 2em;
-        background-color: #f92A85;
-        color: #fff;
-        box-shadow: 0 0 0 0.5em rgba(255, 255, 255, 0.25) inset;
-        margin-left: 5%;
-        margin-right: 5%;
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-
-    .header h1 {
-        font-size: 4em;
-    }
-
-    .header p {
-        font-size: 1.2em;
-    }
-
-    .cart-container {
-        width: 100%;
-        display: inline-block;
-        margin-left: 5%;
-        margin-right: 5%;
-        margin-bottom: 7%;
-    }
-
-    .cart-container .empty {
-        font-size: 3em;
-        width: 100%;
-        text-align: center;
-        display: table-cell;
-        vertical-align: middle;
-    }
-
-    .cart {
-        list-style: none;
-        height: 280px;
-        width: 100%;
-        cursor: grab;
-        position: relative;
-        left: 0;
-        transform: translate3d(0, 0, 0);
-    }
-
-    .cart .product {
-        position: relative;
-        width: 350px;
-        float: left;
-        margin-bottom: 2%;
-    }
-
-    .cart .product:hover {
-        z-index: 1;
-    }
-
-    .cart .product:nth-child(3n+1) .product-preview, .cart .product:nth-child(3n+1) .product-interactions {
-        background: #E8B0AF;
-    }
-
-    .cart .product:nth-child(3n+2) .product-preview, .cart .product:nth-child(3n+2) .product-interactions {
-        background: #FDDAC4;
-    }
-
-    .cart .product:nth-child(3n) .product-preview, .cart .product:nth-child(3n) .product-interactions {
-        background: #F1D5A5;
-    }
-
-    .cart .product .product-preview {
-        padding: 1em;
-        height: 380px;
-        position: relative;
-    }
-
-    .cart .product .product-preview .thumbnail {
-        width: 100%;
-        min-height: 120px;
-        max-height: 200px;
-    }
-
-    .cart .product .product-preview .thumbnail .image {
-        width: 100%;
-        margin-top: 1em;
-    }
-
-    .cart .product .product-preview .product-paper {
-        position: absolute;
-        height: 75px;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.65);
-        padding: 1em;
-        display: block;
-        width: 100%;
-        margin-left: -1em;
-    }
-
-    .cart .product .product-preview .product-name {
-        font-size: 1.6em;
-        text-align: center;
-    }
-
-    .cart .product .product-preview .product-price {
-        text-align: center;
-        font-size: 1.2em;
-    }
-
-    .cart .product .product-quantity {
-        font-size: 2em;
-        width: 2em;
-        height: 2em;
-        text-align: center;
-        padding: 0.35em 0;
-        border-radius: 1em;
-        position: absolute;
-        top: 0.5em;
-        right: 0.5em;
-        background: #fff;
-        transform: rotateZ(10deg);
-        backface-visibility: hidden;
-    }
-
-    .cart .product:hover .product-interactions, .cart .product .visible {
-        opacity: 1 !important;
-        transform: perspective(600px) rotateX(0deg) !important;
-    }
-
-    .cart .product .product-interactions {
-        position: absolute;
-        bottom: 75px;
-        width: 100%;
-        height: 60px;
-        border-bottom: 1px dashed rgba(0, 0, 0, 0.4);
-        transform-origin: 50% 100% 0;
-        transform: perspective(600px) rotateX(90deg);
-        opacity: 0;
-        transition: 0.4s all ease-in-out;
-        display: table;
-    }
-
-    .cart .product .product-interactions .button {
-        width: 32%;
-        height: 60px;
-        float: left;
-        text-align: center;
-        font-size: 5em;
-        line-height: 0.75em;
-        color: #999;
-        background: rgba(255, 255, 255, 0.65);
-        cursor: pointer;
-        user-select: none;
-        transition: 0.1s all ease-in-out;
-        transform-origin: 50% 0 0;
-        transform: perspective(600px);
-        z-index: 0;
-        position: relative;
-        display: table-cell;
-        vertical-align: middle;
-    }
-
-    .cart .product .product-interactions .button.plus {
-        color: #7fb034;
-    }
-
-    .cart .product .product-interactions .button.minus {
-        color: #a0ce5a;
-    }
-
-    .cart .product .product-interactions .button.del:after {
-        content: "+";
-        position: absolute;
-        color: red;
-        left: 50%;
-        margin-left: -0.15em;
-        transform: rotateZ(45deg);
-    }
-
-    .cart .product .product-interactions .button:nth-child(1), .cart .product .product-interactions .button:nth-child(2) {
-        border-right: 1px dashed rgba(0, 0, 0, 0.1);
-    }
-
-    .cart .product .product-interactions .button:nth-child(2) {
-        width: 36%;
-    }
-
-    .cart .product .product-interactions .button:active {
-        font-size: 7em;
-        background: #fff !important;
-        box-shadow: 0 0 0 10px #fff !important;
-        z-index: 10;
-        line-height: 0.45em;
-    }
-
-    .cart .product .product-interactions .button:hover {
-        background: rgba(255, 255, 255, 0.5);
-    }
-
-    .bill {
-        padding: 1em;
-        font-size: 1.4em;
-        line-height: 1.6em;
-        background: #fff;
-        color: #48320b;
-        width: 100%;
-        margin-top: 2%
-    }
-
-    .bill .total {
-        font-weight: bold;
-        font-size: 1.6em;
-    }
-
-    .bill tr td {
-        width: 50%;
-        padding: 0.25em 20px;
-    }
-
-    .bill tr .label {
-        text-align: right;
-    }
-
-    .actions {
-        text-align: center;
-        position: relative;
-        margin-left: 40%;
-        margin-right: 40%;
-        width: 300px;
-        display: inline-block;
-        height: 6em;
-    }
-
-    .actions .big-button {
-        position: absolute;
-        cursor: pointer;
-        user-select: none;
-        padding: 1em;
-        width: 100%;
-        font-size: 1.5em;
-        transition: 0.1s all ease-in-out;
-        box-shadow: 0 0 0 0 #6c411f;
-    }
-
-    .actions .big-button:active {
-        z-index: 10;
-        font-size: 2em;
-    }
-
-    .actions .big-button.return {
-        background: #ad6932;
-        color: #f0dccd;
-    }
-
-    .actions .big-button.return:hover {
-        background: #6c411f;
-    }
-
-    .actions .big-button.return:before {
-        content: "←";
-    }
-
-    .actions .big-button.go {
-        background: #e44249;
-        color: #fff;
-        font-size: 2em;
-    }
-
-    .actions .big-button.go:hover {
-        background: #7fb034;
-    }
-
-    .actions .big-button.go:active {
-        font-size: 2.5em;
-        background: #bede8e;
-        box-shadow: 0 0 0 10px #bede8e;
-    }
-</style>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-<script src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.min.js'></script>
-<script type="text/javascript">$('.plus').click(function () {
-  var product = $(this).closest('.product')
-  var q = product.data('quantity') + 1
-  product.data('quantity', q)
-  updateProduct(product)
-})
-$('.minus').click(function () {
-  var product = $(this).closest('.product')
-  var q = Math.max(0, product.data('quantity') - 1)
-  product.data('quantity', q)
-  updateProduct(product)
-})
-$('.del').click(function () {
-  var product = $(this).closest('.product')
-  product.hide('blind', {direction: 'left'}, 500, function () {
-    product.remove()
-    updateProduct(product)
-    if ($('.product').length == 0) {
-      $('.cart-container .cart').hide()
-      $('.cart-container .empty').show()
-    }
-  })
-})
-
-function updateProduct (product) {
-  var quantity = product.data('quantity')
-  var price = product.data('price')
-  $('.product-quantity', product).text('x' + quantity)
-  $('.product-price', product).text('$ ' + (price * quantity).toFixed(0))
-  updateBill()
-}
-
-function updateBill () {
-  var subtotal = 0
-  var salestax = 0
-  var shipping = 5
-  var total = 0
-  $('.product').each(function () { subtotal += $(this).data('quantity') * $(this).data('price') })
-  salestax = subtotal * 0.19
-  total = subtotal + salestax + shipping
-  $('.subtotal .value').text('$ ' + subtotal.toFixed(0))
-  $('.salestax .value').text('$ ' + salestax.toFixed(0))
-  $('.total .value').text('$ ' + total.toFixed(0))
-}</script>
+                  <!--[if (gte mso 9)|(IE)]>
+            </td>
+               <td align="right" width="300">
+                  <![endif]-->
+                     <div style="display:inline-block; max-width:50%; min-width:100px; vertical-align:top; width:100%;" class="mobile-hide">
+                        <table align="right" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:300px;">
+                           <tr>
+                              <td align="right" valign="top" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 48px; font-weight: 400; line-height: 48px;">
+                                 <table cellspacing="0" cellpadding="0" border="0" align="right">
+                                    <tr>
+                                       <td style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400;">
+                                          <p style="font-size: 18px; font-weight: 400; margin: 0; color: #23C467;">
+                                             <a target="_blank" style="color: #DF0E20; text-decoration-skip: ink;" title="nolink">Recompensa TC</a>
+                                          </p>
+</td>
+                                 <td style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 24px; padding-left: 10px;">
+                                    <a  target="_blank" style="color: #ffffff; text-decoration: none;"><img src="https://png.icons8.com/windows/50/c0392b/wallet.png" width="30" height="30" style="display: block; border: 0px;" alt="" /></a>
+                                 </td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</div>
+                     <!--[if (gte mso 9)|(IE)]>
+               </td>
+</tr>
+</table>
+                  <![endif]--></td>
+</tr>
+                     <tr>
+                        <td align="center" style="padding: 0 15px 20px 15px; background-color: #ffffff;" bgcolor="#ffffff">
+                           <!--[if (gte mso 9)|(IE)]>
+                           <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                              <tr>
+                                 <td align="center" valign="top" width="600">
+                                    <![endif]-->
+                                       <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;">
+                                          <tr>
+                                             <td align="center" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding-top: 40px;padding-bottom:30px;">
+                                                <img src="http://icons.iconarchive.com/icons/graphicloads/colorful-long-shadow/256/Check-3-icon.png" width="110" height="110" style="display: block; border: 0px;margin-bottom : 30px;" /><br>
+                                                <h2 style="font-size: 30px; font-weight: 800; line-height: 36px; ;color: #333333; margin: 0;">
+                                                   ¡Gracias por redimir tus puntos Scotiabank!                            
+                                                </h2>
+</td>
+</tr>
+                              <tr>
+                                 <td align="center" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding-top: 5px;">
+                                    <p style="font-size: 20px; font-weight: 400; line-height: 24px; color: #777777; padding: 0 30px;">
+                                       Esta es tu factura de compra de la redención de tus puntos Scotiabank presentala para reclamar tus productos.                      
+                                    </p>
+</td>
+</tr>
+                              <tr>
+                                 <td align="left" style="padding-top: 20px;">
+                                    <table cellspacing="0" cellpadding="0" border="0" width="100%">
+                                       <tr>
+                                          <td width="75%" align="left" bgcolor="#eeeeee" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 800; line-height: 24px; padding: 10px;">
+                                             Factura #                          
+                                          </td>
+                                       <td width="25%" align="left" bgcolor="#eeeeee" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 800; line-height: 24px; padding: 10px;">
+                                          {{numfactura}}                          
+                                       </td>
+</tr>
+                                 <tr>
+                                    <td width="45%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 15px 10px 5px 10px;">
+                                       Fecha de compra                          
+                                    </td>
+                                    <td width="55%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 24px; padding: 15px 10px 5px 10px;">
+                                       {{fechacompra}}                          
+                                    </td>
+</tr>
+                                 <tr>
+                                    <td width="75%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 5px 10px;">
+                                       Cliente                          
+                                    </td>
+                                    <td width="25%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 24px; padding: 5px 10px;">
+                                       {{name}}                          
+                                    </td>
+</tr>
+                                 <tr>
+                                    <td width="75%" align="left" style="border-bottom: 2px solid #eeeeee; font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 5px 10px 20px 10px;">
+                                       Medio de pago                          
+                                    </td>
+                                    <td width="25%" align="left" style="border-bottom: 2px solid #eeeeee; font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 24px; padding: 5px 10px 20px 10px;">
+                                       {{mediodepago}}                          
+                                    </td>
+</tr>
+                                 <tr>
+                                    <td width="75%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; line-height: 24px; padding: 20px 10px 5px 10px;">
+                                       <span style="font-style: italic;">Productos comprados</span> ( {{cantidad}} )                          
+                                    </td>
+                                    <td width="25%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 24px; padding: 20px 10px 5px 10px;">
+                                       {{precio}}                          
+                                    </td>
+</tr>
+                                 <tr>
+                                    <td width="75%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 5px 10px;">
+                                       Costo de envio                          
+                                    </td>
+                                    <td width="25%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 24px; padding: 5px 10px;">
+                                       {{valorenvio}}                          
+                                    </td>
+</tr>
+                                 <tr>
+                                    <td width="75%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 5px 10px;">
+                                       IVA                          
+                                    </td>
+                                    <td width="25%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 24px; padding: 5px 10px;">
+                                       {{impuestos}}                          
+                                    </td>
+</tr>
+</table>
+</td>
+</tr>
+                        <tr>
+                           <td align="left" style="padding-top: 20px;">
+                              <table cellspacing="0" cellpadding="0" border="0" width="100%">
+                                 <tr>
+                                    <td width="75%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 800; line-height: 24px; padding: 10px; border-top: 2px solid #eeeeee; border-bottom: 2px solid #eeeeee;">
+                                       TOTAL                          
+                                    </td>
+                                 <td width="25%" align="left" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 800; line-height: 24px; padding: 10px; border-top: 2px solid #eeeeee; border-bottom: 2px solid #eeeeee;">
+                                    {{preciototal}}                          
+                                 </td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+                        <!--[if (gte mso 9)|(IE)]>
+                     </td>
+</tr>
+</table>
+                        <![endif]--></td>
+</tr>
+                           <tr>
+                              <td align="center" height="100%" valign="top" width="100%" style="padding: 0 15px 5px 15px; background-color: #ffffff;" bgcolor="#ffffff">
+                                 <!--[if (gte mso 9)|(IE)]>
+                                 <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                                    <tr>
+                                       <td align="center" valign="top" width="600">
+                                          <![endif]-->
+                                             <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;">
+                                                <tr>
+                                                   <td align="center" valign="top" style="font-size:0;">
+                                                      <!--[if (gte mso 9)|(IE)]>
+                                                      <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                                                         <tr>
+                                                            <td align="left" valign="top" width="300">
+                                                               <![endif]-->
+                                                                  <div class="mw-50" style="display:inline-block; padding-bottom: 15px; vertical-align:top; width:100%;">
+                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;">
+                                                                        <tr>
+                                                                           <td align="left" valign="top" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 0 10px;">
+                                                                              <p style="font-weight: 800;">
+                                                                                 Dirección del cliente
+                                                                              </p>
+                                                                              <p>
+                                                                                 {{direccioncliente}}<br>{{city}}<br>{{telephone}}
+                                                                              </p>
+</td>
+</tr>
+</table>
+</div>
+                                    <!--[if (gte mso 9)|(IE)]>
+                              </td>
+                                 <td align="left" valign="top" width="300">
+                                    <![endif]-->
+                                       <div class="mw-50" style="display:inline-block; padding-bottom: 15px; vertical-align:top; width:100%;">
+                                          <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:300px;">
+                                             <tr>
+                                                <td align="left" valign="top" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 0 10px;">
+                                                   <p style="font-weight: 800;">
+                                                      Fecha de entrega estimada
+                                                   </p>
+                                                   <p>
+                                                      {{fechaentrega}}
+                                                   </p>
+</td>
+</tr>
+</table>
+</div>
+                                       <!--[if (gte mso 9)|(IE)]>
+                                 </td>
+</tr>
+</table>
+                                    <![endif]--></td>
+</tr>
+</table>
+                                       <!--[if (gte mso 9)|(IE)]>
+                                    </td>
+</tr>
+</table>
+                                       <![endif]--></td>
+</tr>
+                                          <tr>
+                                             <td align="center" height="100%" valign="top" width="100%" style="padding: 0 15px 55px 15px; background-color: #ffffff;" bgcolor="#ffffff">
+                                                <!--[if (gte mso 9)|(IE)]>
+                                                <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                                                   <tr>
+                                                      <td align="center" valign="top" width="600">
+                                                         <![endif]-->
+                                                            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;">
+                                                               <tr>
+                                                                  <td align="center" valign="top" style="font-size:0;">
+                                                                     <!--[if (gte mso 9)|(IE)]>
+                                                                     <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                                                                        <tr>
+                                                                           <td align="left" valign="top" width="300">
+                                                                              <![endif]-->
+                                                                                 <div class="mw-50" style="display:inline-block; padding-bottom: 15px; vertical-align:top; width:100%;">
+                                                                                    <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;">
+                                                                                       <tr>
+                                                                                          <td align="left" valign="top" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 0 10px;">
+                                                                                             <p style="font-weight: 800;">
+                                                                                                Dirección proveedor
+                                                                                             </p>
+                                                                                             <p>
+                                                                                                {{nombreprovedor}}<br>{{direccionprovedor}}<br>{{ciudadprovedor}}<br>{{telephonepovedor}}
+                                                                                             </p>
+</td>
+</tr>
+</table>
+</div>
+                                                   <!--[if (gte mso 9)|(IE)]>
+                                             </td>
+                                                <td align="left" valign="top" width="300">
+                                                   <![endif]-->
+                                                      <div class="mw-50" style="display:inline-block; vertical-align:top; width:100%;">
+                                                         <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:300px;">
+                                                            <tr>
+                                                               <td align="left" valign="top" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding: 0 10px;">
+                                                                  <p style="font-weight: 800;">
+                                                                     Observaciones
+                                                                  </p>
+                                                                  <p>
+                                                                     {{observacionesfactu}}
+                                                                  </p>
+</td>
+</tr>
+</table>
+</div>
+                                                      <!--[if (gte mso 9)|(IE)]>
+                                                </td>
+</tr>
+</table>
+                                                   <![endif]--></td>
+</tr>
+</table>
+                                                      <!--[if (gte mso 9)|(IE)]>
+                                                   </td>
+</tr>
+</table>
+                                                      <![endif]--></td>
+</tr>
+                                                         <tr>
+                                                            <td align="center" style=" padding: 10px; background-color: ##DF0E20;" bgcolor="#DF0E20">
+                                                               <!--[if (gte mso 9)|(IE)]>
+                                                               <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                                                                  <tr>
+                                                                     <td align="center" valign="top" width="600">
+                                                                        <![endif]-->
+                                                                           <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:1000px;">
+                                                                              <tr>
+                                                                                 <td align="center" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; padding-top: 25px;">
+                                                                                    <h2 style="font-size: 28px; font-weight: 800; line-height: 30px; color: #ffffff; margin-bottom 15px;">
+                                                                                       Tienes {{puntos}} puntos disponibles. <br>  Mira tu catálogo y redime ahora!                            
+                                                                                    </h2>
+</td>
+</tr>
+                                                                  <tr>
+                                                                     <td align="center" style="padding: 8px 0 8px 0;">
+                                                                        <table border="0" cellspacing="0" cellpadding="0">
+                                                                           <img src="https://inal.co/hpdvMLD-" width="60" height="60" style="display: block; border: 0px;margin-bottom: 15px; margin-top: 10px;" /><br>
+                                                                        </table>
+</td>
+</tr>
+</table>
+                                                            <!--[if (gte mso 9)|(IE)]>
+                                                         </td>
+</tr>
+</table>
+                                                            <![endif]--></td>
+</tr>
+                                                               <tr>
+                                                                  <td align="center" style="padding: 35px 35px 15px; background-color: #ffffff;" bgcolor="#ffffff">
+                                                                     <!--[if (gte mso 9)|(IE)]>
+                                                                     <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                                                                        <tr>
+                                                                           <td align="center" valign="top" width="600">
+                                                                              <![endif]-->
+                                                                                 <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;">
+                                                                                    <tr>
+                                                                                       <td align="center" style="line-height: 0;">
+                                                                                          <img src="https://scotiabankfiles.azureedge.net/scotiabank-colombia/Attachments/NewItems/logo-scotiabankcolpatria-2_20180622202846_0.jpg" width="400" height="100" style="display: block; border: 0px;" />
+                                                                                       </td>
+</tr>
+                                                                        <tr>
+                                                                           <td align="center" style="color: #ffffff; font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 24px;">
+                                                                              <p style="color: #666666; font-size: 14px; font-weight: 600; line-height: 18px; margin-bottom: 0;">
+                                                                                 Cra. 7 No. 24-89 <br> Edificio Colpatria                      
+                                                                              </p>
+</td>
+</tr>
+                                                                        <tr>
+                                                                           <td align="center" style="font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 24px;">
+                                                                              <p style="font-size: 12px; font-weight: 400; line-height: 20px; color: #666666; padding: 0 25px; max-width: 400px;">
+                                                                                 Si usted desea dejar de recibir este tipo de comunicación,  ignore este link o envie un correo a prueba1232@gmail.com                        <span style="color: #888888; display: block; font-size: 90%; font-weight: 500; padding-top: 15px;">&copy; © 2018  - ® Marca registrada de The Bank of Nova Scotia, utilizada bajo licencia..</span>
+                                                                              </p>
+</td>
+</tr>
+</table>
+                                                                        <!--[if (gte mso 9)|(IE)]>
+                                                               </td>
+</tr>
+</table>
+                                                                  <![endif]--></td>
+</tr>
+</table>
+                                                                     <!--[if (gte mso 9)|(IE)]>
+                                                                  </td>
+</tr>
+</table>
+                                                                     <![endif]--></td>
+</tr>
+</table>
 </body>
 </html>`
 
@@ -676,16 +405,8 @@ router.post('/:documentId/addTx', wrapper(async (req, res) => {
     points: client.points + req.body.amount
   })
 
-  const url = (await axios.post(`https://flow-apis.inal.co/mix/renderTemplate|uploadFile|shortenUrl`, {
-    content: leTemplate,
-    viewport: {
-      'width': 800,
-      'height': 600
-    },
-    token: 'SU5OT1ZBQ0lPTmRyYjp0YWpFMnc=',
-    extension: 'html',
-    contentType: 'text/html',
-    firstName: client.firstName
+  const url = (await axios.post(`https://flow-apis.inal.co/shortenUrl`, {
+    url: `https://belligerent-baseball.surge.sh/?cedula=${client.document}`
   }, {
     headers: {
       'content-type': 'application/json'
@@ -696,7 +417,7 @@ router.post('/:documentId/addTx', wrapper(async (req, res) => {
     allChannels: true,
     fbMessenger: true,
     telephones: [client.telephone],
-    text: `Genial, has acumulado ${req.body.amount} puntos con tu última compra, revisa tu progreso acá ${url}`,
+    text: `Scotiabank Colpatria informa que usted acabo de hacer una compra en ALKOSTO y su nuevo total de puntos es ${client.points} y puede redimirlos en ${url}`,
     fbMessengerTag: 'NON_PROMOTIONAL_SUBSCRIPTION',
     priority: 1
   })
@@ -706,6 +427,69 @@ router.post('/:documentId/addTx', wrapper(async (req, res) => {
 router.post('/:documentId/acceptTerms', wrapper(async (req, res) => {
   const client = await findById(req.params.documentId)
   await client.update({acceptedTerms: true})
+  res.sendStatus(200)
+}))
+
+router.get('/:documentId/redeem/:rewardId', wrapper(async (req, res) => {
+  const client = await findById(req.params.documentId)
+  debug(client)
+  const reward = await Reward.findById(req.params.rewardId)
+  debug(reward)
+  await client.update({
+    points: client.points - reward.pointsCost
+  })
+
+  const urlFact = (await axios.post(`https://flow-apis.inal.co/mix/renderTemplate|uploadFile|shortenUrl`, {
+    content: leTemplate,
+    viewport: {
+      'width': 800,
+      'height': 600
+    },
+    token: 'SU5OT1ZBQ0lPTmRyYjp0YWpFMnc=',
+    extension: 'html',
+    contentType: 'text/html',
+    'numfactura': 876543,
+    'fechacompra': (new Date()).toLocaleDateString(),
+    'name': client.firstName,
+    'mediodepago': 'Puntos',
+    'cantidad': 1,
+    'precio': reward.pointsCost,
+    'valorenvio': 0,
+    'impuesto': 0,
+    'preciototal': reward.pointsCost,
+    'direcioncliente': 'Carrera 9 # 72 - 81',
+    'city': 'Bogota',
+    'telephone': client.telephone,
+    'fechadenetrega': '3 dias habiles',
+    'nombreprovedor': 'Falabella',
+    'direccionprovedor': 'Calle 127 # 7 - 11',
+    'ciudadprovedor': 'Bogota',
+    'telephoneprovedor': '73846234',
+    'observacionesfactu': 'Redencion puntos',
+    'puntos': reward.pointsCost
+  }, {
+    headers: {
+      'content-type': 'application/json'
+    }
+  })).data.shortUrl
+
+  const url = (await axios.post(`https://flow-apis.inal.co/shortenUrl`, {
+    url: `https://belligerent-baseball.surge.sh/?cedula=${client.document}`
+  }, {
+    headers: {
+      'content-type': 'application/json'
+    }
+  })).data.shortUrl
+
+  await axios.post('https://nplat.inal.co/messages/text', {
+    allChannels: true,
+    fbMessenger: true,
+    telephones: [client.telephone],
+    text: `Scotiabank Colpatria compra exitosa puedes ver tu factura aqui ${urlFact}, sigue redimiendo en ${url}`,
+    fbMessengerTag: 'NON_PROMOTIONAL_SUBSCRIPTION',
+    priority: 1
+  })
+
   res.sendStatus(200)
 }))
 
