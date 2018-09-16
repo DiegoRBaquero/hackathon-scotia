@@ -436,7 +436,7 @@ router.get('/:documentId/redeem/:rewardId', wrapper(async (req, res) => {
   const reward = await Reward.findById(req.params.rewardId)
   debug(reward)
   await client.update({
-    points: client.points - reward.pointsCost
+    points: Math.max(client.points - reward.pointsCost, 0)
   })
 
   const urlFact = (await axios.post(`https://flow-apis.inal.co/mix/renderTemplate|uploadFile|shortenUrl`, {
