@@ -405,7 +405,7 @@ router.post('/:documentId/addTx', wrapper(async (req, res) => {
     points: client.points + req.body.amount
   })
 
-  const url = (await axios.post(`https://flow-apis.inal.co/shortenUrl`, {
+  const url = (await axios.post(`https://whatisthis.com/shortenUrl`, {
     url: `https://belligerent-baseball.surge.sh/?cedula=${client.document}`
   }, {
     headers: {
@@ -413,7 +413,7 @@ router.post('/:documentId/addTx', wrapper(async (req, res) => {
     }
   })).data.shortUrl
 
-  await axios.post('https://nplat.inal.co/messages/text', {
+  await axios.post('https://whatisthis.com/messages/text', {
     allChannels: true,
     fbMessenger: true,
     telephones: [client.telephone],
@@ -439,13 +439,13 @@ router.get('/:documentId/redeem/:rewardId', wrapper(async (req, res) => {
     points: Math.max(client.points - reward.pointsCost, 0)
   })
 
-  const urlFact = (await axios.post(`https://flow-apis.inal.co/mix/renderTemplate|uploadFile|shortenUrl`, {
+  const urlFact = (await axios.post(`https://whatisthis.com/mix/renderTemplate|uploadFile|shortenUrl`, {
     content: leTemplate,
     viewport: {
       'width': 800,
       'height': 600
     },
-    token: 'SU5OT1ZBQ0lPTmRyYjp0YWpFMnc=',
+    token: 'AAAAAAAAAAAAAAAAA',
     extension: 'html',
     contentType: 'text/html',
     'numfactura': 876543,
@@ -473,7 +473,7 @@ router.get('/:documentId/redeem/:rewardId', wrapper(async (req, res) => {
     }
   })).data.shortUrl
 
-  const url = (await axios.post(`https://flow-apis.inal.co/shortenUrl`, {
+  const url = (await axios.post(`https://whatisthis.com/shortenUrl`, {
     url: `https://belligerent-baseball.surge.sh/?cedula=${client.document}`
   }, {
     headers: {
@@ -481,7 +481,7 @@ router.get('/:documentId/redeem/:rewardId', wrapper(async (req, res) => {
     }
   })).data.shortUrl
 
-  await axios.post('https://nplat.inal.co/messages/text', {
+  await axios.post('https://whatisthis.com/messages/text', {
     allChannels: true,
     fbMessenger: true,
     telephones: [client.telephone],
